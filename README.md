@@ -7,6 +7,8 @@ telnet feed. Optionally uses your QRZ.com XML subscription to compute
 real distances, log per-band DX records, and plot every spotter on a
 tiny world map.
 
+73 DL2MBN
+
 ## What it does
 
 1. Enter your callsign on the Cardputer's keyboard.
