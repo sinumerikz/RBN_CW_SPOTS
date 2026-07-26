@@ -1,4 +1,4 @@
-# RBN Checker for M5Cardputer
+# RBN CW Checker for M5Cardputer
 
 A ham radio gadget for the M5Stack Cardputer (ESP32-S3) that checks
 whether your callsign is being heard on air right now, using the
