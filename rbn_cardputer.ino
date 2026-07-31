@@ -183,6 +183,8 @@ struct SpotEntry {
   String spotter;
   int bandIdx;
   int snr;
+  bool hasKm;
+  float km;
 };
 SpotEntry recentSpots[RECENT_COUNT];
 int recentSpotCount = 0;
@@ -407,13 +409,15 @@ void resetResults() {
   displayDirty = true;
 }
 
-void pushRecentSpot(const String &spotter, int bandIdx, int snr) {
+void pushRecentSpot(const String &spotter, int bandIdx, int snr, bool hasKm, float km) {
   for (int i = RECENT_COUNT - 1; i > 0; i--) {
     recentSpots[i] = recentSpots[i - 1];
   }
   recentSpots[0].spotter = spotter;
   recentSpots[0].bandIdx = bandIdx;
   recentSpots[0].snr = snr;
+  recentSpots[0].hasKm = hasKm;
+  recentSpots[0].km = km;
   if (recentSpotCount < RECENT_COUNT) recentSpotCount++;
 }
 
@@ -1122,7 +1126,13 @@ void drawListeningScreen(uint32_t elapsedSec) {
         M5Cardputer.Display.print("  ");
       }
       M5Cardputer.Display.print(recentSpots[i].snr);
-      M5Cardputer.Display.println("dB");
+      M5Cardputer.Display.print("dB");
+      if (recentSpots[i].hasKm) {
+        M5Cardputer.Display.print("  ");
+        M5Cardputer.Display.print((int)recentSpots[i].km);
+        M5Cardputer.Display.print("km");
+      }
+      M5Cardputer.Display.println();
       y += 10;
     }
   }
@@ -1364,6 +1374,9 @@ void handleSpotLine(char* line) {
   int snr = 0;
   if (n > 6) snr = atoi(tokens[6]); // tokens: ... MODE SNR "dB" ...
 
+  bool spotHasKm = false;
+  float spotKm = 0.0f;
+
   if (myLocKnown) {
     float sLat, sLon;
     if (resolveLocation(spotter, sLat, sLon)) {
@@ -1374,11 +1387,13 @@ void handleSpotLine(char* line) {
         if (d > maxDist) maxDist = d;
         anyDistKnown = true;
         checkAndUpdateHighscore(bIdx, d, spotter);
+        spotHasKm = true;
+        spotKm = d;
       }
     }
   }
 
-  pushRecentSpot(spotter, bIdx, snr);
+  pushRecentSpot(spotter, bIdx, snr, spotHasKm, spotKm);
   displayDirty = true;
 
   // short beep to signal a new spot (unless muted in settings)
